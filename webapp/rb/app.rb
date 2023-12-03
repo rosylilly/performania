@@ -58,6 +58,27 @@ class App < Sinatra::Base
     end
   end
 
+  post '/api/initialize' do
+    transaction do |db|
+      db.query('TRUNCATE FROM users')
+      db.query('TRUNCATE FROM posts')
+      db.query('TRUNCATE FROM favorites')
+      db.query('TRUNCATE FROM blocks')
+      db.query('TRUNCATE FROM notifications')
+    end
+
+    status 201
+    json({ language: 'ruby' })
+  end
+
+  post '/api/finalize' do
+    score = params[:score]
+    errors = params[:errors]
+
+    status 200
+    json({ score:, errors: })
+  end
+
   get '/blob/:id/icon' do
     id = params[:id]
     user = db.xquery('SELECT * FROM users WHERE id = ?', id).first

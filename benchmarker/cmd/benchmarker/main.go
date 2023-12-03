@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/isucon/isucandar"
+	"github.com/rosylilly/performania/benchmarker"
 	"github.com/rosylilly/performania/benchmarker/scenario"
 )
 
@@ -31,4 +32,9 @@ func main() {
 	for _, err := range result.Errors.All() {
 		log.Printf("[ERROR] %+v", err)
 	}
+
+	for tag, score := range result.Score.Breakdown() {
+		benchmarker.UserLogger.Printf("[SCORE] %s: %d", tag, score)
+	}
+	benchmarker.UserLogger.Printf("[SCORE] Total: %d", result.Score.Total())
 }

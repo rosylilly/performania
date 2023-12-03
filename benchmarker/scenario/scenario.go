@@ -7,6 +7,7 @@ import (
 	"github.com/isucon/isucandar"
 	"github.com/isucon/isucandar/agent"
 	"github.com/isucon/isucandar/parallel"
+	"github.com/rosylilly/performania/benchmarker"
 	"github.com/rosylilly/performania/benchmarker/scenario/model"
 	"github.com/rosylilly/performania/benchmarker/scenario/random"
 )
@@ -35,6 +36,25 @@ func (s *Scenario) Prepare(ctx context.Context, step *isucandar.BenchmarkStep) e
 
 	s.icons = icons
 	s.covers = covers
+
+	ag, err := agent.NewAgent(
+		agent.WithBaseURL("http://localhost:9292"),
+		agent.WithDefaultTransport(),
+	)
+	if err != nil {
+		return err
+	}
+	req, err := ag.POST("/api/initialize", nil)
+	if err != nil {
+		return err
+	}
+	res, err := ag.Do(ctx, req)
+	if err != nil {
+		return err
+	}
+	if err := res.Body.Close(); err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -75,12 +95,14 @@ func (s *Scenario) Load(ctx context.Context, step *isucandar.BenchmarkStep) erro
 				return
 			}
 
-			log.Printf("user created: %s", user.Login)
+			benchmarker.DevLogger.Printf("user created: %s", user.Login)
 
 			if err := res.Body.Close(); err != nil {
 				step.AddError(err)
 				return
 			}
+
+			step.AddScore(ScoreUserCreation)
 		})
 	}
 }
